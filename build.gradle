@@ -35,6 +35,12 @@ minecraft {
     version = "1.7.2-10.12.2.1147"
     
     runDir = "run/assets"
+    
+    replaceIn "**/*.java"
+    replace "@VERSION@",       project.ext.baseversion
+    replace "@BUILDNUMBER@",   project.ext.baseversion
+    replace "@MC_VERSION@",    project.minecraft.version
+    replace "@MC_APIVERSION@", project.minecraft.apiVersion
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -65,42 +71,6 @@ if(env['BUILD_NUMBER']) {
         ant.entry(key:'version',value:version)
         ant.entry(key:'mc.version',value:project.minecraft.version)
         ant.entry(key:'forge.version',value:project.minecraft.apiVersion)
-    }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-// change version etc in source file, this was a bit complicated
-def filteredSourceDir = file("${buildDir}/filtered/java")
-
-sourceSets {
-    filtered {
-        java {
-            srcDirs = [ filteredSourceDir ]
-        }
-    }
-}
-
-// copy the main sources and filter any '$version' occurences.
-task processVersion (type: Copy) {
-    from sourceSets.main.java
-    into filteredSourceDir
-    
-    from(sourceSets.main.java.srcDirs) {
-        include "**/*.java"
-        exclude "**/Util.java", "**/LuaUtil.java"
-        expand 'version'       : project.ext.baseversion, 
-               'buildnumber'   : project.ext.buildnumber, 
-               'mc_version'    : project.minecraft.version, 
-               'mc_apiversion' : project.minecraft.apiVersion
-    }
-}
-
-// we have to change input of "sourceMainJava" here to use changed source dir
-afterEvaluate {
-    sourceMainJava {
-        dependsOn processVersion
-        source = sourceSets.filtered.java
     }
 }
 

@@ -20,7 +20,7 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-@Mod(modid = "InventoryPeripheral", name = "InventoryPeripheral", version = "$version", dependencies = "required-after:ComputerCraft")
+@Mod(modid = "InventoryPeripheral", name = "InventoryPeripheral", version = "@VERSION@", dependencies = "required-after:ComputerCraft")
 public class InventoryPeripheral {
 	public static Logger logger = null;
 
