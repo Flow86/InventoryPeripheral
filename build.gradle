@@ -36,7 +36,7 @@ minecraft {
     
     runDir = "run/assets"
     
-    replaceIn "**/*.java"
+    replaceIn "InventoryPeripheral.java"
     replace "@VERSION@",       project.ext.baseversion
     replace "@BUILDNUMBER@",   project.ext.baseversion
     replace "@MC_VERSION@",    project.minecraft.version

@@ -1,4 +1,4 @@
-if not os.loadAPI("inv/apis/table") then
+if not os.loadAPI("inv/apis/tableutils") then
 	print("Cannot load table api")
 	return false
 end
@@ -8,7 +8,7 @@ term.clear()
 filehandle = fs.open("inventory.txt", "w")
 
 for k,side in pairs({ "top", "bottom", "left", "right", "front", "back" }) do
-	if peripheral.isPresent(side) then
+	if peripheral.isPresent(side) and peripheral.getType(side) == "inventory" then
 		
 		filehandle.writeLine(side..": "..peripheral.getType(side))
 		
@@ -20,7 +20,7 @@ for k,side in pairs({ "top", "bottom", "left", "right", "front", "back" }) do
 		for i = 1,count do
 			items[i] = prox.getItem(i)
 		end
-		filehandle.writeLine(table.print(items, "\n"))
+		filehandle.writeLine(tableutils.pretty_print(items, "\n"))
 	end
 end
 

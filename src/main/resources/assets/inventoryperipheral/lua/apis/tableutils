@@ -1,4 +1,4 @@
-local function print_table(table, newline, indent)
+function pretty_print(table, newline, indent)
   text = ""
   indent = indent or 0;
   newline = newline or ""
@@ -34,13 +34,13 @@ local function print_table(table, newline, indent)
     if (type(v) == 'table') then
       if (next(v)) then
         text = text..string.rep('  ', indent)..tostring(key).." = "..newline
-        text = text..print_table(v, newline, indent)..","..newline;
+        text = text..pretty_print(v, newline, indent)..","..newline;
       else
         text = text.. string.rep('  ', indent)..tostring(key).." = {},"..newline
       end 
     elseif (type(v) == 'string') then
       text = text..string.rep('  ', indent)..tostring(key).." = '"..v.."',"..newline
-    elseif v == 'nil' then
+    elseif v == nil then
       text = text..string.rep('  ', indent)..tostring(key).." = nil,"..newline
     else
       text = text..string.rep('  ', indent)..tostring(key).." = "..tostring(v)..","..newline
@@ -50,8 +50,4 @@ local function print_table(table, newline, indent)
   text = text..string.rep('  ', indent)..'}'..newline
   
   return text
-end
-
-function print(table, newline, indent)
-	return print_table(table, newline, indent)
 end

@@ -1,0 +1,19 @@
+if not os.loadAPI("inv/apis/tableutils") then
+	print("Cannot load table api")
+	return false
+end
+
+term.clear()
+
+filehandle = fs.open("peripheral-test.txt", "w")
+
+for k,side in pairs({ "top", "bottom", "left", "right", "front", "back" }) do
+	if peripheral.isPresent(side) then
+		filehandle.writeLine(side..": "..peripheral.getType(side))
+		filehandle.writeLine(tableutils.pretty_print(peripheral.getMethods(side), "\n"))
+	end
+end
+
+print("Peripheral info written to peripheral-test.txt")
+
+filehandle.close()
