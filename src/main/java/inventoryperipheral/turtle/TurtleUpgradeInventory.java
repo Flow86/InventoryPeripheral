@@ -1,7 +1,7 @@
 package inventoryperipheral.turtle;
 
 import inventoryperipheral.InventoryPeripheral;
-import inventoryperipheral.peripheral.ItemInventoryPeripheral;
+import inventoryperipheral.items.ItemInventoryModule;
 import inventoryperipheral.peripheral.PeripheralInventory;
 
 import java.util.List;
@@ -31,7 +31,7 @@ public class TurtleUpgradeInventory implements ITurtleUpgrade {
 
 	@Override
 	public ItemStack getCraftingItem() {
-		return new ItemStack(InventoryPeripheral.itemInventoryPeripheral);
+		return new ItemStack(InventoryPeripheral.itemInventoryModule);
 	}
 
 	@Override
@@ -51,7 +51,7 @@ public class TurtleUpgradeInventory implements ITurtleUpgrade {
 
 	@Override
 	public IIcon getIcon(ITurtleAccess turtle, TurtleSide side) {
-		return ItemInventoryPeripheral.icon;
+		return ItemInventoryModule.icon;
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })

@@ -1,9 +1,11 @@
 package inventoryperipheral;
 
-import inventoryperipheral.peripheral.ItemInventoryPeripheral;
-import inventoryperipheral.peripheral.LuaMount;
+import inventoryperipheral.gui.GuiHandler;
+import inventoryperipheral.items.ItemInventoryModule;
 import inventoryperipheral.proxy.CommonProxy;
 import inventoryperipheral.turtle.TurtleUpgradeInventory;
+import inventoryperipheral.util.LuaMount;
+import net.minecraft.block.Block;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 
@@ -26,18 +28,22 @@ public class InventoryPeripheral {
 	public static InventoryPeripheral instance;
 
 	public static TurtleUpgradeInventory turtleUpgradeInventory = null;
-	public static ItemInventoryPeripheral itemInventoryPeripheral = null;
+	public static ItemInventoryModule itemInventoryModule = null;
+
+	public static Block blockCrafter;
 
 	public static LuaMount mount = new LuaMount();
 
 	@SidedProxy(clientSide = "inventoryperipheral.proxy.ClientProxy", serverSide = "inventoryperipheral.proxy.CommonProxy")
 	public static CommonProxy proxy;
+	@SidedProxy(clientSide = "inventoryperipheral.gui.GuiHandlerClient", serverSide = "inventoryperipheral.gui.GuiHandler")
+	public static GuiHandler guiHandler;
 
 	public static CreativeTabs tabInventoryPeripheral = new CreativeTabs("tabInventoryPeripheral") {
 		@Override
 		@SideOnly(Side.CLIENT)
 		public Item getTabIconItem() {
-			return itemInventoryPeripheral;
+			return itemInventoryModule;
 		}
 	};
 

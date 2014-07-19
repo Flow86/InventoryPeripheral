@@ -1,6 +1,5 @@
-package inventoryperipheral.peripheral;
+package inventoryperipheral.util;
 
-import inventoryperipheral.util.LuaUtil;
 
 import java.io.File;
 import java.io.FileInputStream;

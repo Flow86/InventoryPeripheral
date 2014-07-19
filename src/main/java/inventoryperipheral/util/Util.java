@@ -5,13 +5,17 @@ import java.util.HashMap;
 import java.util.List;
 
 import net.minecraft.enchantment.Enchantment;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemEnchantedBook;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityFurnace;
+import net.minecraft.util.Facing;
 import net.minecraftforge.oredict.OreDictionary;
 
 public class Util {
@@ -145,4 +149,64 @@ public class Util {
 		return slots;
 	}
 
+	public static void storeOrDrop(TileEntity tile, ISidedInventory inv, ItemStack stack) {
+		for (int i = 0; i < inv.getSizeInventory(); i++) {
+			ItemStack slotstack = inv.getStackInSlot(i);
+			if (slotstack != null && !Util.areStacksEqual(slotstack, stack))
+				continue;
+
+			int add = Math.min(stack.stackSize,
+					slotstack == null ? Math.min(stack.getMaxStackSize(), inv.getInventoryStackLimit()) : slotstack.getMaxStackSize() - slotstack.stackSize);
+
+			if (slotstack == null) {
+				slotstack = stack.copy();
+			} else {
+				slotstack.stackSize += add;
+			}
+			stack.stackSize -= add;
+			inv.setInventorySlotContents(i, slotstack);
+
+			if (stack.stackSize <= 0)
+				return;
+		}
+
+		int direction = 0;
+		float xoff = tile.getWorldObj().rand.nextFloat() * 0.8F + 0.1F + (0.5F * Facing.offsetsXForSide[direction]);
+		float yoff = tile.getWorldObj().rand.nextFloat() * 0.8F + 0.1F + (0.5F * Facing.offsetsYForSide[direction]);
+		float zoff = tile.getWorldObj().rand.nextFloat() * 0.8F + 0.1F + (0.5F * Facing.offsetsZForSide[direction]);
+
+		EntityItem item = new EntityItem(tile.getWorldObj(), tile.xCoord + xoff, tile.yCoord + yoff, tile.zCoord + zoff, stack);
+		item.delayBeforeCanPickup = 10;
+		item.motionX = (float) tile.getWorldObj().rand.nextGaussian() * 0.05F + Facing.offsetsXForSide[direction];
+		item.motionY = (float) tile.getWorldObj().rand.nextGaussian() * 0.05F + Facing.offsetsYForSide[direction];
+		item.motionZ = (float) tile.getWorldObj().rand.nextGaussian() * 0.05F + Facing.offsetsZForSide[direction];
+
+		tile.getWorldObj().spawnEntityInWorld(item);
+	}
+
+	public static NBTTagList writeInventoryToNBT(IInventory inv) {
+		NBTTagList list = new NBTTagList();
+		for (int i = 0; i < inv.getSizeInventory(); i++) {
+			ItemStack stack = inv.getStackInSlot(i);
+
+			if (stack != null) {
+				NBTTagCompound itemTag = new NBTTagCompound();
+				itemTag.setByte("Slot", (byte) i);
+				stack.writeToNBT(itemTag);
+				list.appendTag(itemTag);
+			}
+		}
+		return list;
+	}
+
+	public static void readInventoryFromNBT(IInventory inv, NBTTagList list) {
+		for (int i = 0; i < list.tagCount(); i++) {
+			NBTTagCompound itemTag = list.getCompoundTagAt(i);
+
+			int slot = itemTag.getByte("Slot") & 255;
+			if (slot >= 0 && slot < inv.getSizeInventory()) {
+				inv.setInventorySlotContents(slot, ItemStack.loadItemStackFromNBT(itemTag));
+			}
+		}
+	}
 }

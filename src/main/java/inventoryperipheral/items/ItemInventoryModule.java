@@ -1,4 +1,4 @@
-package inventoryperipheral.peripheral;
+package inventoryperipheral.items;
 
 import inventoryperipheral.InventoryPeripheral;
 import net.minecraft.client.renderer.texture.IIconRegister;
@@ -7,10 +7,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
 import cpw.mods.fml.common.registry.GameRegistry;
 
-public class ItemInventoryPeripheral extends Item {
+public class ItemInventoryModule extends Item {
 	public static IIcon icon;
 
-	public ItemInventoryPeripheral() {
+	public ItemInventoryModule() {
 		super();
 		setHasSubtypes(false);
 		setMaxDamage(0);

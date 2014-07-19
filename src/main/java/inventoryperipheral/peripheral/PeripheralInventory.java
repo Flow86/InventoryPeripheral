@@ -169,7 +169,6 @@ public class PeripheralInventory implements IPeripheral {
 				if (stack == null)
 					return new Object[] { null };
 
-				// TODO: getUUID ...
 				return new Object[] { Util.itemstackToMap(stack) };
 			}
 			case 15:
