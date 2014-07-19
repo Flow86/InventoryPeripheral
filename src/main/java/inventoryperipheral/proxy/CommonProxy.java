@@ -7,6 +7,7 @@ import inventoryperipheral.turtle.TurtleUpgradeInventory;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 import dan200.computercraft.api.ComputerCraftAPI;
 import dan200.computercraft.api.peripheral.IPeripheralProvider;
@@ -27,5 +28,7 @@ public class CommonProxy {
 				Blocks.diamond_block);
 
 		ComputerCraftAPI.registerPeripheralProvider((IPeripheralProvider) InventoryPeripheral.blockCrafter);
+
+		NetworkRegistry.INSTANCE.registerGuiHandler(InventoryPeripheral.instance, InventoryPeripheral.guiHandler);
 	}
 }

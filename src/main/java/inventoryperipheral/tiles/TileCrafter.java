@@ -1,5 +1,6 @@
 package inventoryperipheral.tiles;
 
+import inventoryperipheral.peripheral.PeripheralCrafter;
 import inventoryperipheral.util.Util;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
@@ -10,14 +11,13 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
 
 public class TileCrafter extends TileEntity implements IPeripheral, ISidedInventory {
-	ItemStack[] inventory;
+	ItemStack[] inventory = new ItemStack[18];
 
 	public InventoryCrafting craftingInv = new InventoryCrafting(new Container() {
 		@Override
@@ -26,10 +26,11 @@ public class TileCrafter extends TileEntity implements IPeripheral, ISidedInvent
 		}
 	}, 3, 3);
 
-	public TileCrafter(World world) {
+	private final IPeripheral crafterPeripheral;
+
+	public TileCrafter() {
 		super();
-		setWorldObj(world);
-		inventory = new ItemStack[18];
+		crafterPeripheral = new PeripheralCrafter(this);
 	}
 
 	@Override
@@ -49,127 +50,11 @@ public class TileCrafter extends TileEntity implements IPeripheral, ISidedInvent
 	}
 
 	@Override
-	public String getType() {
-		return "crafter";
-	}
-
-	@Override
-	public String[] getMethodNames() {
-		return new String[] { "setPattern", "craft", "list", "get" };
-	}
-
-	@Override
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
-		switch (method) {
-		case 0: {
-			if (arguments.length < 1)
-				throw new Exception("too few arguments");
-
-			int[] slots = new int[Math.min(arguments.length, craftingInv.getSizeInventory())];
-			for (int i = 0; i < slots.length; i++) {
-				if (arguments[i] != null && !(arguments[i] instanceof Double))
-					throw new Exception("bad argument #" + (i + 1) + " (expected number)");
-				else {
-					if (arguments[i] == null)
-						slots[i] = -1;
-					else
-						slots[i] = (int) Math.floor((Double) arguments[i]) - 1;
-					if (slots[i] < -1 || slots[i] >= getSizeInventory())
-						throw new Exception("bad slot " + (slots[i] + 1) + " (expected 0-" + getSizeInventory() + ")");
-				}
-			}
-
-			for (int i = 0; i < craftingInv.getSizeInventory(); i++) {
-				if (i >= slots.length || slots[i] < 0)
-					craftingInv.setInventorySlotContents(i, null);
-				else {
-					ItemStack stack;
-					if (getStackInSlot(slots[i]) == null)
-						stack = null;
-					else {
-						stack = getStackInSlot(slots[i]).copy();
-						stack.stackSize = 1;
-						if (stack.isItemDamaged())
-							stack.setItemDamage(0);
-					}
-					craftingInv.setInventorySlotContents(i, stack);
-				}
-			}
-
-			return new Object[] { true };
-		}
-		case 1: {
-			if (arguments.length < 1)
-				throw new Exception("too few arguments");
-			else if (!(arguments[0] instanceof Double))
-				throw new Exception("bad argument #1 (expected number)");
-
-			int slot = (int) Math.floor((Double) arguments[0]);
-			ItemStack slotstack = getStackInSlot(slot);
-
-			ItemStack craftResult = craft(slotstack);
-			if (craftResult == null)
-				return new Object[] { false };
-
-			if (slotstack == null)
-				slotstack = craftResult.copy();
-			else
-				slotstack.stackSize += craftResult.stackSize;
-			setInventorySlotContents(slot, slotstack);
-
-			return new Object[] { true };
-		}
-		case 2: {
-			/*
-			 * TODO: Future<Map<Long, Integer>> callback = TickHandler.addTickCallback(worldObj, new Callable<Map<Long, Integer>>() {
-			 * 
-			 * @Override public Map<Long, Integer> call() { Map<Long, Integer> items = new HashMap<Long, Integer>(); for (int i = 0; i < getSizeInventory();
-			 * i++) { ItemStack slotstack = getStackInSlot(i); if (slotstack == null) continue; long uuid = Util.getUUID(slotstack); if
-			 * (items.containsKey(uuid)) items.put(uuid, items.get(uuid) + slotstack.stackSize); else items.put(uuid, slotstack.stackSize); }
-			 * 
-			 * return items; } });
-			 * 
-			 * return new Object[] { callback.get() };
-			 */
-			return new Object[] { null };
-		}
-		case 3: {
-			if (arguments.length < 1)
-				throw new Exception("too few arguments");
-			else if (!(arguments[0] instanceof Double))
-				throw new Exception("bad argument #1 (expected number)");
-
-			int slot = (int) Math.floor((Double) arguments[0]);
-			if (slot < 0 || slot >= getSizeInventory())
-				throw new Exception("bad slot " + slot + " (expected 0-" + getSizeInventory() + ")");
-
-			ItemStack slotstack = getStackInSlot(slot);
-			if (slotstack == null)
-				return new Object[] { null };
-			else
-				return new Object[] { Util.itemstackToMap(slotstack) };
-		}
-		}
-
-		return new Object[0];
-	}
-
-	@Override
-	public void attach(IComputerAccess computer) {
-
-	}
-
-	@Override
-	public void detach(IComputerAccess computer) {
-
-	}
-
-	@Override
 	public String getInventoryName() {
 		return "Computer Controlled Crafter";
 	}
 
-	public ItemStack craft(ItemStack slotstack) {
+	public ItemStack craft(ItemStack slotstack, boolean dry_run) {
 		int[] sizes = new int[getSizeInventory()];
 		for (int i = 0; i < sizes.length; i++) {
 			ItemStack stack = getStackInSlot(i);
@@ -203,6 +88,9 @@ public class TileCrafter extends TileEntity implements IPeripheral, ISidedInvent
 			return null;
 		if (slotstack != null && (!Util.areStacksEqual(slotstack, craftResult) || slotstack.stackSize + craftResult.stackSize > slotstack.getMaxStackSize()))
 			return null;
+
+		if (dry_run)
+			return craftResult;
 
 		// FakePlayer player = FakePlayer(this.worldObj, "ComputerCraft");
 		// player.alignToTile(this);
@@ -372,7 +260,32 @@ public class TileCrafter extends TileEntity implements IPeripheral, ISidedInvent
 	}
 
 	@Override
+	public String getType() {
+		return crafterPeripheral.getType();
+	}
+
+	@Override
+	public String[] getMethodNames() {
+		return crafterPeripheral.getMethodNames();
+	}
+
+	@Override
+	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
+		return crafterPeripheral.callMethod(computer, context, method, arguments);
+	}
+
+	@Override
+	public void attach(IComputerAccess computer) {
+		crafterPeripheral.attach(computer);
+	}
+
+	@Override
+	public void detach(IComputerAccess computer) {
+		crafterPeripheral.detach(computer);
+	}
+
+	@Override
 	public boolean equals(IPeripheral other) {
-		return false;
+		return crafterPeripheral.equals(other);
 	}
 }

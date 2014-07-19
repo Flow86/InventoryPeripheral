@@ -4,6 +4,7 @@ import inventoryperipheral.InventoryPeripheral;
 import inventoryperipheral.gui.GuiHandler;
 import inventoryperipheral.tiles.TileCrafter;
 import net.minecraft.block.Block;
+import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.player.EntityPlayer;
@@ -16,7 +17,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.peripheral.IPeripheralProvider;
 
-public class BlockCrafter extends Block implements IPeripheralProvider {
+public class BlockCrafter extends Block implements IPeripheralProvider, ITileEntityProvider {
 
 	IIcon icon;
 
@@ -33,11 +34,6 @@ public class BlockCrafter extends Block implements IPeripheralProvider {
 	@Override
 	public IPeripheral getPeripheral(World world, int x, int y, int z, int side) {
 		return (IPeripheral) world.getTileEntity(x, y, z);
-	}
-
-	@Override
-	public TileEntity createTileEntity(World world, int metadata) {
-		return new TileCrafter(world);
 	}
 
 	@Override
@@ -66,5 +62,12 @@ public class BlockCrafter extends Block implements IPeripheralProvider {
 		player.openGui(InventoryPeripheral.instance, GuiHandler.CRAFTER, worldObj, xCoord, yCoord, zCoord);
 
 		return true;
+	}
+
+	@Override
+	public TileEntity createNewTileEntity(World var1, int var2) {
+		TileEntity tile = new TileCrafter();
+		tile.setWorldObj(var1);
+		return tile;
 	}
 }

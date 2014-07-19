@@ -9,7 +9,7 @@ import org.lwjgl.opengl.GL11;
 
 public class GuiCrafter extends GuiContainer {
 	private final ContainerCrafter container;
-	private static final ResourceLocation crafterBg = new ResourceLocation("crafter.png");
+	private static final ResourceLocation crafterBg = new ResourceLocation("inventoryperipheral:textures/gui/crafter.png");
 
 	public GuiCrafter(ContainerCrafter container) {
 		super(container);

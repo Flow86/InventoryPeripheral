@@ -10,16 +10,17 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
 
 public class ContainerCrafter extends Container {
-	private final TileCrafter crafter;
+	private final TileCrafter tile;
 	SlotReadOnly craftResult;
 	public EntityPlayer player;
 	public IInventory inventory;
 
-	public ContainerCrafter(EntityPlayer player, TileCrafter inventory) {
+	public ContainerCrafter(EntityPlayer player, TileCrafter tile) {
 		super();
 
 		this.player = player;
-		this.inventory = inventory;
+		this.tile = tile;
+		this.inventory = tile;
 
 		for (int y = 0; y < 3; y++) {
 			for (int x = 0; x < 9; x++) {
@@ -31,11 +32,9 @@ public class ContainerCrafter extends Container {
 			addSlotToContainer(new Slot(player.inventory, x, 8 + x * 18, 140 + 58));
 		}
 
-		this.crafter = inventory;
-
 		for (int x = 0; x < 3; x++) {
 			for (int y = 0; y < 3; y++) {
-				addSlotToContainer(new SlotReadOnly(inventory.craftingInv, x + y * 3, 30 + x * 18, 17 + y * 18));
+				addSlotToContainer(new SlotReadOnly(tile.craftingInv, x + y * 3, 30 + x * 18, 17 + y * 18));
 			}
 		}
 
@@ -43,14 +42,14 @@ public class ContainerCrafter extends Container {
 
 		for (int x = 0; x < 9; x++) {
 			for (int y = 0; y < 2; y++) {
-				addSlotToContainer(new Slot(crafter, x + y * 9, 8 + x * 18, 90 + y * 18));
+				addSlotToContainer(new Slot(this.tile, x + y * 9, 8 + x * 18, 90 + y * 18));
 			}
 		}
 	}
 
 	@Override
 	public void detectAndSendChanges() {
-		craftResult.putStack(CraftingManager.getInstance().findMatchingRecipe(crafter.craftingInv, crafter.getWorldObj()));
+		craftResult.putStack(CraftingManager.getInstance().findMatchingRecipe(tile.craftingInv, tile.getWorldObj()));
 
 		super.detectAndSendChanges();
 	}
@@ -58,10 +57,10 @@ public class ContainerCrafter extends Container {
 	@Override
 	public ItemStack slotClick(int par1, int par2, int par3, EntityPlayer par4EntityPlayer) {
 		if (!par4EntityPlayer.worldObj.isRemote && par1 == craftResult.slotNumber) {
-			for (int i = 0; i < crafter.getSizeInventory(); i++) {
-				ItemStack slotstack = crafter.getStackInSlot(i);
+			for (int i = 0; i < tile.getSizeInventory(); i++) {
+				ItemStack slotstack = tile.getStackInSlot(i);
 				if (slotstack == null || Util.areStacksEqual(slotstack, craftResult.getStack())) {
-					ItemStack craftResult = crafter.craft(slotstack);
+					ItemStack craftResult = tile.craft(slotstack, false);
 					if (craftResult == null)
 						break;
 
@@ -69,7 +68,7 @@ public class ContainerCrafter extends Container {
 						slotstack = craftResult.copy();
 					else
 						slotstack.stackSize += craftResult.stackSize;
-					crafter.setInventorySlotContents(i, slotstack);
+					tile.setInventorySlotContents(i, slotstack);
 
 					detectAndSendChanges();
 					break;
