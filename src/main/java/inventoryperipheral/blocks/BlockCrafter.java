@@ -43,7 +43,7 @@ public class BlockCrafter extends Block implements IPeripheralProvider, ITileEnt
 
 	@Override
 	public String getUnlocalizedName() {
-		return "block.inventoryperipheral.crafter";
+		return "tile.inventoryperipheral:crafter";
 	}
 
 	@Override

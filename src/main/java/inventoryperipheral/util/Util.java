@@ -64,6 +64,19 @@ public class Util {
 			HashMap map = new HashMap();
 			map.put("Name", getNameForItemStack(itemstack));
 			map.put("RawName", getRawNameForStack(itemstack));
+
+			int[] ids = OreDictionary.getOreIDs(itemstack);
+
+			if (ids.length > 1) {
+				HashMap dict = new HashMap();
+				int j = 0;
+				for (int i : ids) {
+					dict.put(j++, OreDictionary.getOreName(i));
+				}
+				map.put("Dictionary", dict);
+			} else if (ids.length == 1)
+				map.put("Dictionary", OreDictionary.getOreName(ids[0]));
+
 			map.put("Size", itemstack.stackSize);
 			map.put("DamageValue", itemstack.getItemDamage());
 			map.put("MaxStack", itemstack.getMaxStackSize());

@@ -1,6 +1,6 @@
 itemGroup.tabInventoryPeripheral=Inventory Peripheral
 
-item.inventoryperipheral.inventoryModule.name=Inventory Module
-block.inventoryperipheral.crafter.name=Computer Controlled Crafter
+tile.inventoryperipheral:inventoryModule.name=Inventory Module
+tile.inventoryperipheral:crafter.name=Computer Controlled Crafter
 
 turtle.inventoryperipheral.adjective=Inventory

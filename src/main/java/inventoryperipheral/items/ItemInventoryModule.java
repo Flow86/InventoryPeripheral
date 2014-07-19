@@ -31,6 +31,6 @@ public class ItemInventoryModule extends Item {
 
 	@Override
 	public String getUnlocalizedName(ItemStack itemStack) {
-		return "item.inventoryperipheral.inventoryModule";
+		return "tile.inventoryperipheral:inventoryModule";
 	}
 }
