@@ -31,6 +31,10 @@ group = 'com.github.flow86'
 ext.baseversion = '1.7.2'
 archivesBaseName = 'inventoryperipheral'
 
+// add build number to version
+def env = System.getenv()
+ext.buildnumber = ( env['BUILD_NUMBER'] ? env['BUILD_NUMBER'] : "custom" )
+
 minecraft {
     version = "1.7.2-10.12.2.1147"
     
@@ -38,7 +42,7 @@ minecraft {
     
     replaceIn "InventoryPeripheral.java"
     replace "@VERSION@",       project.ext.baseversion
-    replace "@BUILDNUMBER@",   project.ext.baseversion
+    replace "@BUILDNUMBER@",   project.ext.buildnumber
     replace "@MC_VERSION@",    project.minecraft.version
     replace "@MC_APIVERSION@", project.minecraft.apiVersion
 }
@@ -56,10 +60,6 @@ compileJava {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-// add build number to version
-def env = System.getenv()
-ext.buildnumber = ( env['BUILD_NUMBER'] ? env['BUILD_NUMBER'] : "custom" )
 
 version=ext.baseversion + "-" + ext.buildnumber
 
