@@ -1,0 +1,165 @@
+// DON'T TOUCH THE BUILDSCTPT[] BLOCK
+// its special, and it is only there to make ForgeGradle work correctly.
+
+buildscript {
+    repositories {
+        mavenCentral()
+        maven {
+            name = "forge"
+            url = "http://files.minecraftforge.net/maven"
+        }
+        maven {
+            name = "sonatype"
+            url = "https://oss.sonatype.org/content/repositories/snapshots/"
+        }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
+    }
+}
+
+apply plugin: 'forge'
+apply plugin: 'java'
+// apply plugin: 'checkstyle'
+
+sourceCompatibility = JavaVersion.VERSION_1_6
+targetCompatibility = JavaVersion.VERSION_1_6
+
+///////////////////////////////////////////////////////////////////////////////
+
+group = 'com.github.flow86'
+ext.baseversion = '1.7.2'
+archivesBaseName = 'inventoryperipheral'
+
+minecraft {
+    version = "1.7.2-10.12.2.1147"
+    
+    runDir = "run/assets"
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+// set java compiler options to display warnings
+tasks.withType(Compile) {
+    options.compilerArgs << "-Xlint:unchecked"
+}
+
+// display files which get compiled
+compileJava {
+    options.listFiles = true
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+// add build number to version
+def env = System.getenv()
+ext.buildnumber = ( env['BUILD_NUMBER'] ? env['BUILD_NUMBER'] : "custom" )
+
+version=ext.baseversion + "-" + ext.buildnumber
+
+logger.lifecycle "Building InventoryPeripheral Mod " + ext.baseversion + "-" + ext.buildnumber + " for MC-Forge " + project.minecraft.apiVersion
+
+// generate property file for jenkins
+if(env['BUILD_NUMBER']) {
+    ant.propertyfile(file:"jenkins.properties", comment:'Build Properties') {
+        ant.entry(key:'version',value:version)
+        ant.entry(key:'mc.version',value:project.minecraft.version)
+        ant.entry(key:'forge.version',value:project.minecraft.apiVersion)
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+// change version etc in source file, this was a bit complicated
+def filteredSourceDir = file("${buildDir}/filtered/java")
+
+sourceSets {
+    filtered {
+        java {
+            srcDirs = [ filteredSourceDir ]
+        }
+    }
+}
+
+// copy the main sources and filter any '$version' occurences.
+task processVersion (type: Copy) {
+    from sourceSets.main.java
+    into filteredSourceDir
+    
+    expand 'version'       : project.ext.baseversion, 
+           'buildnumber'   : project.ext.buildnumber, 
+           'mc_version'    : project.minecraft.version, 
+           'mc_apiversion' : project.minecraft.apiVersion
+}
+
+// we have to change input of "sourceMainJava" here to use changed source dir
+afterEvaluate {
+    sourceMainJava {
+        dependsOn processVersion
+        source = sourceSets.filtered.java
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+// copy resource files
+processResources {
+    exclude "**/*.psd", "**/*.bak"
+
+    // text resources which getting filtered
+    from(sourceSets.main.resources.srcDirs) {
+        include '**/*.lang'
+        include '**/*.info'
+        include '**/*.properties'
+
+        expand 'version'       : project.ext.baseversion, 
+               'buildnumber'   : project.ext.buildnumber, 
+               'mc_version'    : project.minecraft.version, 
+               'mc_apiversion' : project.minecraft.apiVersion
+    }
+
+    // binary resources
+    from(sourceSets.main.resources.srcDirs) {
+        exclude '**/*.lang'
+        exclude '**/*.info'
+        exclude '**/*.properties'
+    }
+}
+
+jar {
+    appendix = 'universal'
+    
+    manifest {
+        attributes 'MCVersion'    : project.minecraft.version
+        attributes 'Version'      : project.version
+    }
+}
+
+task deobfJar(type: Jar) {
+    from sourceSets.main.output
+    classifier = 'dev'
+
+    manifest {
+        attributes 'MCVersion'    : project.minecraft.version
+        attributes 'Version'      : project.version
+    }
+}
+
+// make sure all of these happen when we run build
+build.dependsOn deobfJar
+ 
+artifacts {
+    // the default jar is already here by default
+    archives deobfJar
+}
+
+// eclipse settings
+//
+// Run Client:
+//   Main Class:   net.minecraft.launchwrapper.Launch
+//   Arguments:    --version 1.6 --tweakClass cpw.mods.fml.common.launcher.FMLTweaker --accessToken FMLPlayer
+//   VM Arguments: -Dfml.ignoreInvalidMinecraftCertificates=true
+//
+// Run Server:
+//   Main Class:   cpw.mods.fml.relauncher.ServerLaunchWrapper
+//

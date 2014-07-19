@@ -1,0 +1,29 @@
+if not os.loadAPI("inv/apis/table") then
+	print("Cannot load table api")
+	return false
+end
+
+term.clear()
+
+filehandle = fs.open("inventory.txt", "w")
+
+for k,side in pairs({ "top", "bottom", "left", "right", "front", "back" }) do
+	if peripheral.isPresent(side) then
+		
+		filehandle.writeLine(side..": "..peripheral.getType(side))
+		
+		prox = peripheral.wrap(side)
+		count = prox.getSlotCount()
+		filehandle.writeLine(side..": SlotCount: "..count)
+		
+		items = {}
+		for i = 1,count do
+			items[i] = prox.getItem(i)
+		end
+		filehandle.writeLine(table.print(items, "\n"))
+	end
+end
+
+print("Inventory info written to inventory.txt")
+
+filehandle.close()

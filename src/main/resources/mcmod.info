@@ -1,0 +1,16 @@
+[
+{
+  "modid": "InventoryPeripheral",
+  "name": "InventoryPeripheral",
+  "description": "",
+  "version": "${version}",
+  "mcversion": "${mc_version}",
+  "url": "https://github.com/Flow86/InventoryPeripheral",
+  "updateUrl": "",
+  "authors": [ "Flow86" ],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": [ "ComputerCraft" ]
+}
+]
